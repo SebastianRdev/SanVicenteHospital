@@ -54,35 +54,6 @@ dotnet run
 
 ---
 
-## 🧩 Project Structure
-
-```
-SanVicenteHospital/
-│
-├── data/
-│   └── Database.cs              # Simulates the in-memory database (Patients, Doctors, Appointments, Logs)
-│
-├── models/
-│   ├── Appointment.cs           # Appointment model
-│   ├── Doctor.cs                # Doctor model
-│   ├── Patient.cs               # Patient model
-│   └── EmailLog.cs              # Email sending log
-│
-├── repositories/
-│   └── Repository.cs            # Generic repository with CRUD operations over in-memory lists
-│
-├── services/
-│   ├── AppointmentService.cs    # Business logic for managing appointments
-│   └── EmailService.cs          # Handles email confirmations
-│
-├── menus/
-│   └── MainMenu.cs              # Console-based user interface
-│
-└── Program.cs                   # Main entry point
-```
-
----
-
 ## 💻 Technologies Used
 
 | Component                | Description                                            |
@@ -99,9 +70,9 @@ SanVicenteHospital/
 
 *(You can add your screenshots here once the application is running)*
 
-| Main Menu                                  | Appointment Registration                       |
+| Main Menu                                  | Appointment CRUD                               |
 | ------------------------------------------ | ---------------------------------------------- |
-| ![Screenshot 1](docs/screenshots/menu.png) | ![Screenshot 2](docs/screenshots/register.png) |
+| ![Screenshot 1](docs/screenshots/MainMenu.png) | ![Screenshot 2](docs/screenshots/AppointmentMenu.png) |
 
 ---
 
