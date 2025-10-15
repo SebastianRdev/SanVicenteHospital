@@ -70,8 +70,8 @@ dotnet run
 
 *(You can add your screenshots here once the application is running)*
 
-| Main Menu                                  | Appointment CRUD                               |
-| ------------------------------------------ | ---------------------------------------------- |
+| Main Menu                                  | Appointment CRUD                                          |
+| ------------------------------------------ | --------------------------------------------------------- |
 | ![Screenshot 1](docs/screenshots/MainMenu.png) | ![Screenshot 2](docs/screenshots/AppointmentMenu.png) |
 
 ---
@@ -83,7 +83,7 @@ dotnet run
 | **Name**      | Sebastian Reyes                                               |
 | **Clan**      | Caiman                                                        |
 | **Email**     | [sebastianrdev@outlook.com](mailto:sebastianrdev@outlook.com) |
-| **ID Number** | 123456789                                                     |
+| **ID Number** | 1044607228                                                    |
 
 ---
 
