@@ -1,12 +1,8 @@
 namespace SanVicenteHospital.interfaces;
 
-/// <summary>
-/// Interface that defines an entity with a unique identifier in the SanVicenteHospital system.
-/// </summary>
+// Interface that defines an entity with a unique identifier in the SanVicenteHospital system.
 public interface IEntity
 {
-    /// <summary>
-    /// Unique identifier for the entity.
-    /// </summary>
+    // Unique identifier for the entity.
     Guid Id { get; }
 }

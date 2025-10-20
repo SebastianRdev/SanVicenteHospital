@@ -8,7 +8,7 @@ using SanVicenteHospital.repositories;
 using SanVicenteHospital.utils;
 
 // Service that manages patient-related business logic in the SanVicenteHospital system.
-// Handles registration, updates, deletion, and viewing of patients and their pets.
+// Handles registration, updates, deletion, and viewing of patients and their patients.
 public class PatientService
 {
     private readonly IRepository<Patient> _patientRepo;
@@ -20,7 +20,7 @@ public class PatientService
         _doctorRepo = doctorRepo;
     }
 
-    // Registers a new patient with optional pets.
+    // Registers a new patient with optional patients.
     public Patient RegisterPatient(string name, int identification, int age, string address, string phone, string email)
     {
         if (Validator.IsDuplicate(_patientRepo.GetAll(), d => d.Identification, identification, "identification"))
@@ -70,7 +70,7 @@ public class PatientService
         _patientRepo.Update(patient);
     }
 
-    // Removes a patient and disassociates their pets.
+    // Removes a patient and disassociates their patients.
     public void RemovePatient(Guid patientId)
     {
         var patient = _patientRepo.GetById(patientId) ?? throw new KeyNotFoundException("Patient not found");

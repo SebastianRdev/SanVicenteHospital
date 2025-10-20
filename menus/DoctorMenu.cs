@@ -4,11 +4,14 @@ using SanVicenteHospital.models;
 using SanVicenteHospital.services;
 using SanVicenteHospital.utils;
 using SanVicenteHospital.models.Enums;
+
 // The system validates that the identification is unique and that there are no doctors with the same combination of name and specialty
 // It should be possible to list all doctors, with an option to filter by specialty.
 public class DoctorMenu
 {
     private readonly DoctorService _doctorService;
+
+    bool showPressKey = false;
 
     public DoctorMenu(DoctorService doctorService)
     {
@@ -21,6 +24,11 @@ public class DoctorMenu
         {
             try
             {
+                if (showPressKey)
+                {
+                    Console.WriteLine("\nPress any key to display the menu...");
+                    Console.ReadKey();
+                }
                 Console.Clear();
                 ConsoleUI.ShowDoctorMainMenu();
                 Console.Write("\n👉 Enter your choice: ");
@@ -29,12 +37,15 @@ public class DoctorMenu
                 {
                     case 1:
                         DoctorCRUD();
+                        showPressKey = true;
                         continue;
                     case 2:
                         ViewDoctorsBySpecialtyUI();
+                        showPressKey = true;
                         continue;
                     case 3:
                         Console.WriteLine("\nBack to main menu 👥");
+                        showPressKey = false;
                         break;
                     default:
                         Console.WriteLine("\n⚠️ Invalid choice. Please try again");
@@ -56,6 +67,12 @@ public class DoctorMenu
         {
             try
             {
+                if (showPressKey)
+                {
+                    Console.WriteLine("\nPress any key to display the menu...");
+                    Console.ReadKey();
+                }
+                Console.Clear();
                 ConsoleUI.ShowDoctorCRUD();
                 Console.Write("\n👉 Enter your choice: ");
                 string? input = Console.ReadLine();
@@ -69,18 +86,23 @@ public class DoctorMenu
                 {
                     case 1:
                         RegisterDoctorUI();
+                        showPressKey = true;
                         continue;
                     case 2:
                         ViewDoctorsUI();
+                        showPressKey = true;
                         continue;
                     case 3:
                         UpdateDoctorUI();
+                        showPressKey = true;
                         continue;
                     case 4:
                         RemoveDoctorUI();
+                        showPressKey = true;
                         continue;
                     case 5:
                         Console.WriteLine("\nBack to Doctor main menu 👥");
+                        showPressKey = false;
                         break;
                     default:
                         Console.WriteLine("\n⚠️ Invalid choice. Please try again");

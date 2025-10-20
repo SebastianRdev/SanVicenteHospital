@@ -7,6 +7,7 @@ using SanVicenteHospital.utils;
 public class PatientMenu
 {
     private readonly PatientService _patientService;
+    bool showPressKey = false;
 
     public PatientMenu(PatientService patientService)
     {
@@ -19,17 +20,25 @@ public class PatientMenu
         {
             try
             {
+                if (showPressKey)
+                {
+                    Console.WriteLine("\nPress any key to display the menu...");
+                    Console.ReadKey();
+                }
                 Console.Clear();
                 ConsoleUI.ShowPatientMainMenu();
                 Console.Write("\n👉 Enter your choice: ");
+                Console.WriteLine($"Es: {showPressKey}");
                 int choice = Convert.ToInt32(Console.ReadLine());
                 switch (choice)
                 {
                     case 1:
                         PatientCRUD();
+                        showPressKey = true;
                         continue;
                     case 2:
                         Console.WriteLine("\nBack to main menu 👥");
+                        showPressKey = false;
                         break;
                     default:
                         Console.WriteLine("\n⚠️ Invalid choice. Please try again");
@@ -51,8 +60,15 @@ public class PatientMenu
         {
             try
             {
+                if (showPressKey)
+                {
+                    Console.WriteLine("\nPress any key to display the menu...");
+                    Console.ReadKey();
+                }
+                Console.Clear();
                 ConsoleUI.ShowPatientCRUD();
                 Console.Write("\n👉 Enter your choice: ");
+                Console.WriteLine($"Es: {showPressKey}");
                 string? input = Console.ReadLine();
                 if (!int.TryParse(input, out int choice))
                 {
@@ -64,19 +80,23 @@ public class PatientMenu
                 {
                     case 1:
                         RegisterPatientUI();
+                        showPressKey = true;
                         continue;
                     case 2:
-                        
                         ViewPatientsUI();
+                        showPressKey = true;
                         continue;
                     case 3:
                         UpdatePatientUI();
+                        showPressKey = true;
                         continue;
                     case 4:
                         RemovePatientUI();
+                        showPressKey = true;
                         continue;
                     case 5:
                         Console.WriteLine("\nBack to Patient main menu 👥");
+                        showPressKey = false;
                         break;
                     default:
                         Console.WriteLine("\n⚠️ Invalid choice. Please try again");

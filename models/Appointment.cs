@@ -12,9 +12,9 @@ public class Appointment : IEntity
 
     public string Reason { get; set; } = string.Empty;
 
-    public Guid PetId { get; set; }
+    public Guid PatientId { get; set; }
 
-    public Guid VeterinarianId { get; set; }
+    public Guid DoctorId { get; set; }
 
     public ServiceType ServiceType { get; set; }
 
@@ -26,10 +26,10 @@ public class Appointment : IEntity
     public DateTime? CancellationDate { get; set; }
 
 
-    public Appointment(Guid petId, Guid veterinarianId, DateTime startTime, DateTime endTime, ServiceType serviceType, string reason)
+    public Appointment(Guid patientId, Guid doctorId, DateTime startTime, DateTime endTime, ServiceType serviceType, string reason)
     {
-        PetId = petId;
-        VeterinarianId = veterinarianId;
+        PatientId = patientId;
+        DoctorId = doctorId;
         StartTime = startTime;
         EndTime = endTime;
         ServiceType = serviceType;

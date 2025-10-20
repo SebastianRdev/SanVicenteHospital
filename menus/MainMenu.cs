@@ -8,19 +8,19 @@ using SanVicenteHospital.utils;
 
 public class MainMenu
 {
-    // 🔹 Crear repositorios una sola vez
+    // Crear repositorios una sola vez
     private static readonly IRepository<Patient> _patientRepo = new RepositoryDict<Patient>();
     private static readonly IRepository<Doctor> _doctorRepo = new RepositoryDict<Doctor>();
     private static readonly IRepository<Appointment> _appointmentRepo = new Repository<Appointment>();
     private static readonly IRepository<EmailLog> _emailRepo = new Repository<EmailLog>();
 
-    // 🔹 Crear servicios una sola vez
+    // Crear servicios una sola vez
     private static readonly PatientService _patientService = new(_patientRepo, _doctorRepo);
     private static readonly DoctorService _doctorService = new(_doctorRepo, _patientRepo);
     private static readonly EmailService _emailService = new EmailService(_emailRepo);
     private static readonly AppointmentService _appointmentService = new(_patientRepo, _doctorRepo, _appointmentRepo, _emailService);
 
-    // 🔹 Create menus by passing dependencies
+    // Create menus by passing dependencies
     private static readonly PatientMenu _patientMenu = new(_patientService);
     private static readonly DoctorMenu _doctorMenu = new(_doctorService);
     private static readonly AppointmentMenu _appointmentMenu = new(_appointmentService, _emailService);
@@ -34,7 +34,7 @@ public class MainMenu
         {
             try
             {
-                // Console.Clear();
+                Console.Clear();
                 ConsoleUI.ShowMainMenu();
                 Console.Write("\n👉 Enter your choice: ");
                 int choice = Convert.ToInt32(Console.ReadLine());
@@ -51,10 +51,7 @@ public class MainMenu
                         _appointmentMenu.AppointmentMainMenu();
                         continue;
                     case 4:
-                        // _appointmentMenu.AppointmentMainMenu();
-                        continue;
-                    case 5:
-                        Console.WriteLine("\n👋 Thanks for using HealthClinic System. Goodbye! 🐶🐱");
+                        Console.WriteLine("\n👋 Thanks for using SanVicenteHospital System. Goodbye!");
                         break;
                     default:
                         Console.WriteLine("\n⚠️  Invalid choice. Please try again");

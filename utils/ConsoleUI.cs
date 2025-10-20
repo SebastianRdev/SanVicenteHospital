@@ -13,8 +13,7 @@ public class ConsoleUI : IConsoleUI
         Console.WriteLine("1️⃣  Patients Module");
         Console.WriteLine("2️⃣  Doctors Module");
         Console.WriteLine("3️⃣  Appointments Module");
-        Console.WriteLine("4️⃣  Queries 🔍");
-        Console.WriteLine("5️⃣  Exit 🚪");
+        Console.WriteLine("4️⃣  Exit 🚪");
     }
 
     // Displays the ShowPatientMainMenu menu on the console.

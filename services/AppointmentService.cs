@@ -30,41 +30,41 @@ public class AppointmentService
     public Appointment RegisterAppointment(Guid patientId, Guid doctorId, DateTime startTime, DateTime endTime, ServiceType serviceType, string reason)
     {
         // 🩺 Basic validations
-        var patient = _patientRepo.GetById(patientId) ?? throw new KeyNotFoundException("Patient not found.");
-        var doctor = _doctorRepo.GetById(doctorId) ?? throw new KeyNotFoundException("Doctor not found.");
+        var patient = _patientRepo.GetById(patientId) ?? throw new KeyNotFoundException("Patient not found");
+        var doctor = _doctorRepo.GetById(doctorId) ?? throw new KeyNotFoundException("Doctor not found");
 
         if (endTime <= startTime)
-            throw new ArgumentException("End time must be after start time.");
+            throw new ArgumentException("End time must be after start time");
 
         // Validate appointment interlocking for the doctor
         bool overlapsDoctor = _appointmentRepo.GetAll().Any(a =>
-            a.VeterinarianId == doctorId &&
+            a.DoctorId == doctorId &&
             ((startTime >= a.StartTime && startTime < a.EndTime) ||
              (endTime > a.StartTime && endTime <= a.EndTime) ||
              (startTime <= a.StartTime && endTime >= a.EndTime))
         );
 
         if (overlapsDoctor)
-            throw new InvalidOperationException("❌ The doctor already has an appointment in that time range.");
+            throw new InvalidOperationException("❌ The doctor already has an appointment in that time range");
 
         // Validate appointment interlocking for the patient
         bool overlapsPatient = _appointmentRepo.GetAll().Any(a =>
-            a.PetId == patientId &&
+            a.PatientId == patientId &&
             ((startTime >= a.StartTime && startTime < a.EndTime) ||
              (endTime > a.StartTime && endTime <= a.EndTime) ||
              (startTime <= a.StartTime && endTime >= a.EndTime))
         );
 
         if (overlapsPatient)
-            throw new InvalidOperationException("❌ The patient already has an appointment in that time range.");
+            throw new InvalidOperationException("❌ The patient already has an appointment in that time range");
 
         var appointment = new Appointment(patientId, doctorId, startTime, endTime, serviceType, reason);
         _appointmentRepo.Add(appointment);
 
         var emailLog = _emailService.SendAppointmentConfirmation(
-            patient.Email,
-            patient.Name,
-            doctor.Name,
+            patient.Email ?? "Unknown",
+            patient.Name ?? "Unknown",
+            doctor.Name ?? "Unknown",
             startTime,
             endTime,
             reason
@@ -111,15 +111,15 @@ public class AppointmentService
         if (newPatientId.HasValue)
         {
             var patient = _patientRepo.GetById(newPatientId.Value)
-                ?? throw new KeyNotFoundException("Pet not found");
-            appointment.PetId = patient.Id;
+                ?? throw new KeyNotFoundException("Patient not found");
+            appointment.PatientId = patient.Id;
         }
 
         if (newDoctorId.HasValue)
         {
             var doctor = _doctorRepo.GetById(newDoctorId.Value)
-                ?? throw new KeyNotFoundException("Veterinarian not found");
-            appointment.VeterinarianId = doctor.Id;
+                ?? throw new KeyNotFoundException("Doctor not found");
+            appointment.DoctorId = doctor.Id;
         }
 
         if (newStartTime.HasValue)
@@ -168,9 +168,9 @@ public class AppointmentService
         var appointment = _appointmentRepo.GetById(appointmentId)
             ?? throw new KeyNotFoundException("Appointment not found");
 
-    // Validate workflow logic (e.g., cannot mark as Completed if not InProgress)
+        // Validate workflow logic (e.g., cannot mark as Completed if not InProgress)
         if (appointment.Status == AppointmentStatus.Cancelled)
-            throw new InvalidOperationException("Cannot change status of a cancelled appointment.");
+            throw new InvalidOperationException("Cannot change status of a cancelled appointment");
 
         appointment.Status = newStatus;
 

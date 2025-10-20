@@ -8,6 +8,7 @@ public class AppointmentMenu
 {
     private readonly AppointmentService _appointmentService;
     private readonly EmailService _emailService;
+    bool showPressKey = false;
 
     public AppointmentMenu(AppointmentService appointmentService, EmailService emailService)
     {
@@ -21,7 +22,12 @@ public class AppointmentMenu
         {
             try
             {
-                // Console.Clear();
+                if (showPressKey)
+                {
+                    Console.WriteLine("\nPress any key to display the menu...");
+                    Console.ReadKey();
+                }
+                Console.Clear();
                 ConsoleUI.ShowAppointmentsMainMenu();
                 Console.Write("\n👉 Enter your choice: ");
                 int choice = Convert.ToInt32(Console.ReadLine());
@@ -29,18 +35,23 @@ public class AppointmentMenu
                 {
                     case 1:
                         AppointmentsCRUD();
+                        showPressKey = true;
                         continue;
                     case 2:
                         ChangeAppointmentStatusUI();
+                        showPressKey = true;
                         continue;
                     case 3:
                         ViewAppointmentsFilteredByMenuUI();
+                        showPressKey = true;
                         continue;
                     case 4:
                         _emailService.ViewEmailHistory();
-                        break;
+                        showPressKey = true;
+                        continue;
                     case 5:
                         Console.WriteLine("\nBack to main menu");
+                        showPressKey = false;
                         break;
                     default:
                         Console.WriteLine("\n⚠️  Invalid choice. Please try again");
@@ -62,6 +73,12 @@ public class AppointmentMenu
         {
             try
             {
+                if (showPressKey)
+                {
+                    Console.WriteLine("\nPress any key to display the menu...");
+                    Console.ReadKey();
+                }
+                Console.Clear();
                 ConsoleUI.ShowAppointmentsCRUD();
                 Console.Write("\n👉 Enter your choice: ");
                 string? input = Console.ReadLine();
@@ -74,18 +91,23 @@ public class AppointmentMenu
                 {
                     case 1:
                         RegisterAppointmentUI();
+                        showPressKey = true;
                         continue;
                     case 2:
                         ViewAppointmentsUI();
+                        showPressKey = true;
                         continue;
                     case 3:
                         UpdateAppointmentUI();
+                        showPressKey = true;
                         continue;
                     case 4:
                         RemoveAppointmentUI();
+                        showPressKey = true;
                         continue;
                     case 5:
                         Console.WriteLine("\nBack to main menu");
+                        showPressKey = false;
                         break;
                     default:
                         Console.WriteLine("\n⚠️  Invalid choice. Please try again");
@@ -133,7 +155,7 @@ public class AppointmentMenu
                 return;
             }
 
-                    // 🩺 Show available doctors
+            // 🩺 Show available doctors
             Console.WriteLine("\n👨‍⚕️ --- Doctor List ---");
             foreach (var v in vets)
                 Console.WriteLine($"ID: {v.Id} | Name: {v.Name} | Specialty: {v.Specialty}");
@@ -145,7 +167,7 @@ public class AppointmentMenu
                 return;
             }
 
-                    // 📅 Appointment date
+            // 📅 Appointment date
             DateTime startTime;
             while (true)
             {
@@ -178,7 +200,7 @@ public class AppointmentMenu
                 }
             }
 
-                    // 🩸 Available services
+            // 🩸 Available services
             Console.WriteLine("\n💉 --- Available Services ---");
             foreach (var s in Enum.GetValues(typeof(ServiceType)))
                 Console.WriteLine($"{(int)s}. {s}");
@@ -231,11 +253,11 @@ public class AppointmentMenu
 
         foreach (var a in appointments)
         {
-            var patient = _appointmentService.GetAllPatients().FirstOrDefault(p => p.Id == a.PetId);
-            var doctor = _appointmentService.GetAllDoctors().FirstOrDefault(d => d.Id == a.VeterinarianId);
+            var patient = _appointmentService.GetAllPatients().FirstOrDefault(p => p.Id == a.PatientId);
+            var doctor = _appointmentService.GetAllDoctors().FirstOrDefault(d => d.Id == a.DoctorId);
             Console.WriteLine($"\n🆔 {a.Id}");
-            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PetId})");
-            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.VeterinarianId})");
+            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PatientId})");
+            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.DoctorId})");
             Console.WriteLine($"📅 Start Time: {a.StartTime}");
             Console.WriteLine($"📅 End Time: {a.EndTime}");
             Console.WriteLine($"🧼 Service: {a.ServiceType}");
@@ -271,7 +293,7 @@ public class AppointmentMenu
                 return;
             }
 
-                    // Get current appointment
+            // Get current appointment
             var appointment = _appointmentService.GetAppointmentById(appointmentId);
             if (appointment == null)
             {
@@ -280,8 +302,8 @@ public class AppointmentMenu
             }
 
             Console.WriteLine($"\nCurrent appointment details:");
-            Console.WriteLine($"🐕 Pet ID: {appointment.PetId}");
-            Console.WriteLine($"👨‍⚕️ Veterinarian ID: {appointment.VeterinarianId}");
+            Console.WriteLine($"🐕 Patient ID: {appointment.PatientId}");
+            Console.WriteLine($"👨‍⚕️ Doctor ID: {appointment.DoctorId}");
             Console.WriteLine($"📅 Start Time: {appointment.StartTime:yyyy-MM-dd HH:mm}");
             Console.WriteLine($"📅 End Time: {appointment.EndTime:yyyy-MM-dd HH:mm}");
             Console.WriteLine($"💉 Service: {appointment.ServiceType}");
@@ -289,7 +311,7 @@ public class AppointmentMenu
 
             Console.WriteLine("\nUpdate fields (y/n):");
 
-            Guid? newPetId = appointment.PetId;
+            Guid? newPatientId = appointment.PatientId;
             if (Validator.AskYesNo("Change patient? (y/n): "))
             {
                 var patients = _appointmentService.GetAllPatients();
@@ -299,18 +321,18 @@ public class AppointmentMenu
                     return;
                 }
 
-                Console.WriteLine("\n--- Pet List ---");
+                Console.WriteLine("\n--- Patient List ---");
                 foreach (var patient in patients)
                     Console.WriteLine($"ID: {patient.Id} | Name: {patient.Name}");
 
-                string petInput = Validator.ValidateContent("Enter new Pet ID: ");
-                if (Guid.TryParse(petInput, out Guid petId))
-                    newPetId = petId;
+                string patientInput = Validator.ValidateContent("Enter new Patient ID: ");
+                if (Guid.TryParse(patientInput, out Guid patientId))
+                    newPatientId = patientId;
                 else
-                    Console.WriteLine("⚠️  Invalid Pet ID format. Pet not changed");
+                    Console.WriteLine("⚠️  Invalid Patient ID format. Patient not changed");
             }
 
-            Guid? newVetId = appointment.VeterinarianId;
+            Guid? newVetId = appointment.DoctorId;
             if (Validator.AskYesNo("Change doctor? (y/n): "))
             {
                 var vets = _appointmentService.GetAllDoctors();
@@ -369,7 +391,7 @@ public class AppointmentMenu
 
             _appointmentService.UpdateAppointment(
                 appointmentId,
-                newPetId,
+                newPatientId,
                 newVetId,
                 newStartTime,
                 newEndTime,
@@ -565,7 +587,7 @@ public class AppointmentMenu
         }
 
         var appointments = _appointmentService.ViewAppointments()
-            .Where(a => a.PetId == patientId)
+            .Where(a => a.PatientId == patientId)
             .OrderBy(a => a.StartTime)
             .ToList();
 
@@ -579,10 +601,10 @@ public class AppointmentMenu
 
         foreach (var a in appointments)
         {
-            var doctor = _appointmentService.GetAllDoctors().FirstOrDefault(d => d.Id == a.VeterinarianId);
+            var doctor = _appointmentService.GetAllDoctors().FirstOrDefault(d => d.Id == a.DoctorId);
             Console.WriteLine($"\n🗓️  {a.StartTime} : {a.EndTime}");
             Console.WriteLine($"💉 Service: {a.ServiceType}");
-            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.VeterinarianId})");
+            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.DoctorId})");
             Console.WriteLine($"📋 Status: {a.Status}");
         }
 
@@ -618,7 +640,7 @@ public class AppointmentMenu
         }
 
         var appointments = _appointmentService.ViewAppointments()
-            .Where(a => a.VeterinarianId == doctorId)
+            .Where(a => a.DoctorId == doctorId)
             .OrderBy(a => a.StartTime)
             .ToList();
 
@@ -632,10 +654,10 @@ public class AppointmentMenu
 
         foreach (var a in appointments)
         {
-            var patient = _appointmentService.GetAllPatients().FirstOrDefault(p => p.Id == a.PetId);
+            var patient = _appointmentService.GetAllPatients().FirstOrDefault(p => p.Id == a.PatientId);
             Console.WriteLine($"\n🗓️  {a.StartTime} : {a.EndTime}");
             Console.WriteLine($"💉 Service: {a.ServiceType}");
-            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PetId})");
+            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PatientId})");
             Console.WriteLine($"📋 Status: {a.Status}");
         }
 
@@ -667,13 +689,13 @@ public class AppointmentMenu
 
         foreach (var a in appointments)
         {
-            var patient = _appointmentService.GetAllPatients().FirstOrDefault(p => p.Id == a.PetId);
-            var doctor = _appointmentService.GetAllDoctors().FirstOrDefault(d => d.Id == a.VeterinarianId);
+            var patient = _appointmentService.GetAllPatients().FirstOrDefault(p => p.Id == a.PatientId);
+            var doctor = _appointmentService.GetAllDoctors().FirstOrDefault(d => d.Id == a.DoctorId);
 
             Console.WriteLine($"\n🕓 {a.StartTime:HH:mm} - {a.EndTime:HH:mm}");
             Console.WriteLine($"💉 {a.ServiceType}");
-            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PetId})");
-            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.VeterinarianId})");
+            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PatientId})");
+            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.DoctorId})");
             Console.WriteLine($"📋 Status: {a.Status}");
         }
 
@@ -711,13 +733,13 @@ public class AppointmentMenu
 
         foreach (var a in appointments)
         {
-            var patient = _appointmentService.GetAllPatients().FirstOrDefault(p => p.Id == a.PetId);
-            var doctor = _appointmentService.GetAllDoctors().FirstOrDefault(d => d.Id == a.VeterinarianId);
+            var patient = _appointmentService.GetAllPatients().FirstOrDefault(p => p.Id == a.PatientId);
+            var doctor = _appointmentService.GetAllDoctors().FirstOrDefault(d => d.Id == a.DoctorId);
 
             Console.WriteLine($"\n🗓️  {a.StartTime} - {a.EndTime}");
             Console.WriteLine($"💉 {a.ServiceType}");
-            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PetId})");
-            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.VeterinarianId})");
+            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PatientId})");
+            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.DoctorId})");
         }
     }
 

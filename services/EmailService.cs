@@ -1,23 +1,28 @@
+
+namespace SanVicenteHospital.services;
+
 using System.Net;
 using System.Net.Mail;
 using SanVicenteHospital.models;
 using SanVicenteHospital.repositories;
 using SanVicenteHospital.interfaces;
-
-namespace SanVicenteHospital.services;
-
+using DotNetEnv;
 public class EmailService
 {
     private readonly IRepository<EmailLog> _emailRepo;
-
+    private readonly string _emailUser;
+    private readonly string _emailPass;
     public EmailService(IRepository<EmailLog> emailRepo)
     {
         _emailRepo = emailRepo;
+        Env.Load();
+
+        _emailUser = Environment.GetEnvironmentVariable("EMAIL_USER") ?? throw new Exception("EMAIL_USER not found");
+        _emailPass = Environment.GetEnvironmentVariable("EMAIL_PASS") ?? throw new Exception("EMAIL_PASS not found");
     }
 
     public EmailLog SendAppointmentConfirmation(string toEmail, string patientName, string doctorName, DateTime start, DateTime end, string reason)
     {
-        toEmail = "sebasreyes112@gmail.com";
         string subject = "Medical appointment confirmation - San Vicente Hospital";
         string body = $@"
             Hello {patientName},
@@ -44,11 +49,11 @@ public class EmailService
             var smtp = new SmtpClient("smtp.gmail.com")
             {
                 Port = 587,
-                Credentials = new NetworkCredential("sebasreyes112@gmail.com", "olno czom qbzj dfwf"),
+                Credentials = new NetworkCredential(_emailUser, _emailPass),
                 EnableSsl = true
             };
 
-            smtp.Send("sebasreyes112@gmail.com", toEmail, subject, body);
+            smtp.Send(_emailUser, toEmail, subject, body);
 
             log.Status = "Sent";
         }
@@ -68,11 +73,11 @@ public class EmailService
 
         if (!logs.Any())
         {
-            Console.WriteLine("\n📭 No emails registered.");
+            Console.WriteLine("\n📭 No emails registered");
             return;
         }
 
-        Console.WriteLine("\n--- 📧 EMAIL HISTORY ---");
+        Console.WriteLine("\n--- 📧  EMAIL HISTORY ---");
         foreach (var log in logs)
         {
             Console.WriteLine($@"
