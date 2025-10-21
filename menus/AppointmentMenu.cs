@@ -130,42 +130,24 @@ public class AppointmentMenu
             Console.WriteLine("\n--- 🗓️  Register Appointment ---");
 
             var patients = _appointmentService.GetAllPatients();
-            if (patients.Count == 0)
-            {
-                Console.WriteLine("⚠️  No patients registered. Please register a patient first");
-                return;
-            }
+            if (!Validator.IsExist(patients, "⚠️  No patients registered. Please register a patient first")) return;
 
-            var vets = _appointmentService.GetAllDoctors();
-            if (vets.Count == 0)
-            {
-                Console.WriteLine("⚠️  No doctors registered. Please register one first");
-                return;
-            }
+            var doctors = _appointmentService.GetAllDoctors();
+            if (!Validator.IsExist(doctors, "⚠️  No doctors registered. Please register one first")) return;
 
-                    // Show available patients
+            // Show available patients
             Console.WriteLine("\n --- Patient List ---");
             foreach (var p in patients)
                 Console.WriteLine($"ID: {p.Id} | Name: {p.Name}");
 
-            string patientInput = Validator.ValidateContent("\nEnter Patient ID: ");
-            if (!Guid.TryParse(patientInput, out Guid patientId))
-            {
-                Console.WriteLine("⚠️  Invalid Patient ID format");
-                return;
-            }
+            var patientId = Validator.ValidateGuid("\nEnter Patient ID: ");
 
             // 🩺 Show available doctors
             Console.WriteLine("\n👨‍⚕️ --- Doctor List ---");
-            foreach (var v in vets)
+            foreach (var v in doctors)
                 Console.WriteLine($"ID: {v.Id} | Name: {v.Name} | Specialty: {v.Specialty}");
 
-            string doctorInput = Validator.ValidateContent("\nEnter Doctor ID: ");
-            if (!Guid.TryParse(doctorInput, out Guid doctorId))
-            {
-                Console.WriteLine("⚠️  Invalid Doctor ID format");
-                return;
-            }
+            var doctorId = Validator.ValidateGuid("\nEnter Doctor ID: ");
 
             // 📅 Appointment date
             DateTime startTime;
@@ -201,18 +183,8 @@ public class AppointmentMenu
             }
 
             // 🩸 Available services
-            Console.WriteLine("\n💉 --- Available Services ---");
-            foreach (var s in Enum.GetValues(typeof(ServiceType)))
-                Console.WriteLine($"{(int)s}. {s}");
-
-            int serviceInt = Validator.ValidatePositiveInt("\nEnter service number: ");
-            if (!Enum.IsDefined(typeof(ServiceType), serviceInt))
-            {
-                Console.WriteLine("⚠️  Invalid service number");
-                return;
-            }
-            var serviceType = (ServiceType)serviceInt;
-
+            var serviceType = Validator.ValidateServiceType();
+            
             // 📝 Reason
             string reason = Validator.ValidateContent("Enter appointment reason: ");
 
@@ -243,29 +215,9 @@ public class AppointmentMenu
     private void ViewAppointmentsUI()
     {
         var appointments = _appointmentService.ViewAppointments().OrderBy(a => a.StartTime).ToList();
-        if (appointments.Count == 0)
-        {
-            Console.WriteLine("⚠️  No appointments registered");
-            return;
-        }
+        if (!Validator.IsExist(appointments, "⚠️  No appointments registered")) return;
 
-        Console.WriteLine("\n--- 📅  View Appointments ---");
-
-        foreach (var a in appointments)
-        {
-            var patient = _appointmentService.GetAllPatients().FirstOrDefault(p => p.Id == a.PatientId);
-            var doctor = _appointmentService.GetAllDoctors().FirstOrDefault(d => d.Id == a.DoctorId);
-            Console.WriteLine($"\n🆔 {a.Id}");
-            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PatientId})");
-            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.DoctorId})");
-            Console.WriteLine($"📅 Start Time: {a.StartTime}");
-            Console.WriteLine($"📅 End Time: {a.EndTime}");
-            Console.WriteLine($"🧼 Service: {a.ServiceType}");
-            Console.WriteLine($"🗒️  Reason: {a.Reason}");
-            Console.WriteLine($"📋 Status: {a.Status}");
-        }
-
-        Console.WriteLine("\n--- End of Appointments List ---");
+        ConsoleUI.ShowAppointmentsList(appointments,_appointmentService.GetAllPatients(),_appointmentService.GetAllDoctors());
     }
 
     private void UpdateAppointmentUI()
@@ -275,93 +227,63 @@ public class AppointmentMenu
         try
         {
             var appointments = _appointmentService.ViewAppointments().OrderBy(a => a.StartTime).ToList();
-            if (appointments.Count == 0)
-            {
-                Console.WriteLine("⚠️  No appointments registered");
-                return;
-            }
+            if (!Validator.IsExist(appointments, "⚠️  No appointments registered")) return;
 
             foreach (var a in appointments)
             {
                 Console.WriteLine($"\n🆔 {a.Id} | 🩺 {a.ServiceType} | 📅 {a.StartTime} : {a.EndTime} | 📋 Status: {a.Status}");
             }
 
-            string idInput = Validator.ValidateContent("\nEnter Appointment ID: ");
-            if (!Guid.TryParse(idInput, out Guid appointmentId))
-            {
-                Console.WriteLine("⚠️  Invalid ID format");
-                return;
-            }
+            var appointmentId = Validator.ValidateGuid("\nEnter Appointment ID: ");
 
             // Get current appointment
             var appointment = _appointmentService.GetAppointmentById(appointmentId);
-            if (appointment == null)
-            {
-                Console.WriteLine("❌ No appointment found with that ID");
-                return;
-            }
+            if (!Validator.IsExist(appointment, "❌ No appointment found with that ID")) return;
+            if (appointment is null) return; // For the compilator
 
             Console.WriteLine($"\nCurrent appointment details:");
-            Console.WriteLine($"🐕 Patient ID: {appointment.PatientId}");
-            Console.WriteLine($"👨‍⚕️ Doctor ID: {appointment.DoctorId}");
-            Console.WriteLine($"📅 Start Time: {appointment.StartTime:yyyy-MM-dd HH:mm}");
-            Console.WriteLine($"📅 End Time: {appointment.EndTime:yyyy-MM-dd HH:mm}");
-            Console.WriteLine($"💉 Service: {appointment.ServiceType}");
-            Console.WriteLine($"📝 Reason: {appointment.Reason}");
+            ConsoleUI.ShowAppointment(appointment);
 
             Console.WriteLine("\nUpdate fields (y/n):");
 
             Guid? newPatientId = appointment.PatientId;
+            Guid? newDoctorId = appointment.DoctorId;
+            DateTime newStartTime = appointment.StartTime;
+            DateTime newEndTime = appointment.EndTime;
+            ServiceType newService = appointment.ServiceType;
+            string newReason = appointment.Reason;
+
             if (Validator.AskYesNo("Change patient? (y/n): "))
             {
                 var patients = _appointmentService.GetAllPatients();
-                if (patients.Count == 0)
-                {
-                    Console.WriteLine("⚠️  No patients available. Please register one first");
-                    return;
-                }
+                if (!Validator.IsExist(patients, "⚠️  No patients available. Please register one first")) return;
 
                 Console.WriteLine("\n--- Patient List ---");
-                foreach (var patient in patients)
-                    Console.WriteLine($"ID: {patient.Id} | Name: {patient.Name}");
+                foreach (var p in patients)
+                    Console.WriteLine($"ID: {p.Id} | Name: {p.Name}");
 
-                string patientInput = Validator.ValidateContent("Enter new Patient ID: ");
-                if (Guid.TryParse(patientInput, out Guid patientId))
-                    newPatientId = patientId;
-                else
-                    Console.WriteLine("⚠️  Invalid Patient ID format. Patient not changed");
+                var patientId = Validator.ValidateGuid("\nEnter Patient ID: ");
             }
-
-            Guid? newVetId = appointment.DoctorId;
+            
             if (Validator.AskYesNo("Change doctor? (y/n): "))
             {
-                var vets = _appointmentService.GetAllDoctors();
-                if (vets.Count == 0)
-                {
-                    Console.WriteLine("⚠️  No doctors available. Please register one first");
-                    return;
-                }
+                var doctors = _appointmentService.GetAllDoctors();
+                if (!Validator.IsExist(doctors, "⚠️  No doctors available. Please register one first")) return;
 
                 Console.WriteLine("\n--- Doctor List ---");
-                foreach (var v in vets)
-                    Console.WriteLine($"ID: {v.Id} | Name: {v.Name} | Specialty: {v.Specialty}");
+                foreach (var d in doctors)
+                    Console.WriteLine($"ID: {d.Id} | Name: {d.Name} | Specialty: {d.Specialty}");
 
-                string vetInput = Validator.ValidateContent("Enter new Doctor ID: ");
-                if (Guid.TryParse(vetInput, out Guid vetId))
-                    newVetId = vetId;
-                else
-                    Console.WriteLine("⚠️  Invalid Doctor ID format. Doctor not changed");
+                var doctorId = Validator.ValidateGuid("\nEnter Doctor ID: ");
             }
-
-            DateTime newStartTime = appointment.StartTime;
+            
             if (Validator.AskYesNo("Change start time? (y/n): "))
             {
                 string startTimeInput = Validator.ValidateContent("Enter new start time (yyyy-MM-dd HH:mm): ");
                 if (DateTime.TryParse(startTimeInput, out DateTime startTime))
                     newStartTime = startTime;
             }
-
-            DateTime newEndTime = appointment.EndTime;
+            
             if (Validator.AskYesNo("Change end time? (y/n): "))
             {
                 string endTimeInput = Validator.ValidateContent("Enter new end time (yyyy-MM-dd HH:mm): ");
@@ -371,28 +293,19 @@ public class AppointmentMenu
                     Console.WriteLine("⚠️  Invalid date format. Date not changed");
             }
 
-            ServiceType newService = appointment.ServiceType;
             if (Validator.AskYesNo("Change service type? (y/n): "))
             {
-                Console.WriteLine("\n--- Available Services ---");
-                foreach (var s in Enum.GetValues(typeof(ServiceType)))
-                    Console.WriteLine($"{(int)s}. {s}");
-
-                int serviceInt = Validator.ValidatePositiveInt("Select service number: ");
-                if (Enum.IsDefined(typeof(ServiceType), serviceInt))
-                    newService = (ServiceType)serviceInt;
-                else
-                    Console.WriteLine("⚠️  Invalid service number. Service not changed");
+                newService = Validator.ValidateServiceType();
             }
 
-            string newReason = appointment.Reason;
+            
             if (Validator.AskYesNo("Change reason? (y/n): "))
                 newReason = Validator.ValidateContent("📝 Enter new reason: ");
 
             _appointmentService.UpdateAppointment(
                 appointmentId,
                 newPatientId,
-                newVetId,
+                newDoctorId,
                 newStartTime,
                 newEndTime,
                 newService,
@@ -420,24 +333,14 @@ public class AppointmentMenu
         Console.WriteLine("\n--- ❌ Remove Appointment ---");
 
         var appointments = _appointmentService.ViewAppointments().OrderBy(a => a.StartTime).ToList();
-        if (appointments.Count == 0)
-        {
-            Console.WriteLine("⚠️  No appointments registered");
-            return;
-        }
+        if (!Validator.IsExist(appointments, "⚠️  No appointments registered")) return;
+
         foreach (var a in appointments)
         {
             Console.WriteLine($"\n🆔 {a.Id} | 🩺 {a.ServiceType} | 📅 {a.StartTime} : {a.EndTime} | 📋 Status: {a.Status}");
         }
 
-        Console.Write("\nEnter Appointment ID to remove: ");
-        var appointmentIdInput = Console.ReadLine();
-
-        if (!Guid.TryParse(appointmentIdInput, out Guid appointmentId))
-        {
-            Console.WriteLine("⚠️  Invalid ID format");
-            return;
-        }
+        var appointmentId = Validator.ValidateGuid("\nEnter Appointment ID: ");
 
         try
         {
@@ -459,49 +362,19 @@ public class AppointmentMenu
         Console.WriteLine("\n--- 🔄 Change Appointment Status ---");
 
         var appointments = _appointmentService.ViewAppointments().OrderBy(a => a.StartTime).ToList();
-        if (appointments.Count == 0)
-        {
-            Console.WriteLine("⚠️  No appointments registered");
-            return;
-        }
+        if (!Validator.IsExist(appointments, "⚠️  No appointments registered")) return;
 
-        foreach (var a in appointments)
-        {
-            Console.WriteLine($"\n🆔 {a.Id}");
-            Console.WriteLine($"📅 Start Time: {a.StartTime}");
-            Console.WriteLine($"📅 End Time: {a.EndTime}");
-            Console.WriteLine($"💉 Service: {a.ServiceType}");
-            Console.WriteLine($"📋 Status: {a.Status}");
-            Console.WriteLine("-----------------------");
-        }
+       ViewAppointmentsUI();
 
-        string idInput = Validator.ValidateContent("\nEnter Appointment ID to change status: ");
-        if (!Guid.TryParse(idInput, out Guid appointmentId))
-        {
-            Console.WriteLine("⚠️  Invalid ID format");
-            return;
-        }
+        var appointmentId = Validator.ValidateGuid("\nEnter Appointment ID to change status: ");
 
         var appointment = _appointmentService.GetAppointmentById(appointmentId);
-        if (appointment == null)
-        {
-            Console.WriteLine("❌ Appointment not found");
-            return;
-        }
+
+        if (!Validator.IsExist(appointment, "❌ Appointment not found")) return;
+        if (appointment is null) return; // For the compilator
 
         Console.WriteLine($"\nCurrent status: {appointment.Status}");
-        Console.WriteLine("\n--- Available Statuses ---");
-        foreach (var status in Enum.GetValues(typeof(AppointmentStatus)))
-            Console.WriteLine($"{(int)status}. {status}");
-
-        int statusInt = Validator.ValidatePositiveInt("\nEnter new status number: ");
-        if (!Enum.IsDefined(typeof(AppointmentStatus), statusInt))
-        {
-            Console.WriteLine("⚠️  Invalid status number");
-            return;
-        }
-
-        var newStatus = (AppointmentStatus)statusInt;
+        var newStatus = Validator.ValidateAppointmentStatus();
 
         string? notes = null;
         if (Validator.AskYesNo("Add notes to this status change? (y/n): "))
@@ -562,40 +435,25 @@ public class AppointmentMenu
         Console.WriteLine("\n--- 🧍 View Appointments by Patient ---");
 
         var patients = _appointmentService.GetAllPatients();
-        if (patients.Count == 0)
-        {
-            Console.WriteLine("⚠️  No patients registered");
-            return;
-        }
+        if (!Validator.IsExist(patients, "⚠️  No patients available. Please register one first")) return;
 
         Console.WriteLine("\n--- Patient List ---");
         foreach (var p in patients)
             Console.WriteLine($"ID: {p.Id} | Name: {p.Name}");
 
-        string input = Validator.ValidateContent("\nEnter Patient ID: ");
-        if (!Guid.TryParse(input, out Guid patientId))
-        {
-            Console.WriteLine("⚠️  Invalid ID format");
-            return;
-        }
+
+        var patientId = Validator.ValidateGuid("\nEnter Patient ID: ");
 
         var patient = patients.FirstOrDefault(p => p.Id == patientId);
-        if (patient == null)
-        {
-            Console.WriteLine("⚠️  Patient not found");
-            return;
-        }
+        if (!Validator.IsExist(patient, "⚠️  Patient not found")) return;
+        if (patient is null) return; // For the compilator
 
         var appointments = _appointmentService.ViewAppointments()
             .Where(a => a.PatientId == patientId)
             .OrderBy(a => a.StartTime)
             .ToList();
 
-        if (appointments.Count == 0)
-        {
-            Console.WriteLine("⚠️  No appointments found for this patient");
-            return;
-        }
+        if (!Validator.IsExist(appointments, "⚠️  No appointments found for this patient")) return;
 
         Console.WriteLine($"\n--- Appointments for Patient: {patient.Name} ---");
 
@@ -615,40 +473,24 @@ public class AppointmentMenu
         Console.WriteLine("\n--- 👨‍⚕️ View Appointments by Doctor ---");
 
         var doctors = _appointmentService.GetAllDoctors();
-        if (doctors.Count == 0)
-        {
-            Console.WriteLine("⚠️  No doctors registered");
-            return;
-        }
+        if (!Validator.IsExist(doctors, "⚠️  No doctors registered")) return;
 
         Console.WriteLine("\n--- Doctor List ---");
         foreach (var d in doctors)
             Console.WriteLine($"ID: {d.Id} | Name: {d.Name} | Specialty: {d.Specialty}");
 
-        string input = Validator.ValidateContent("\nEnter Doctor ID: ");
-        if (!Guid.TryParse(input, out Guid doctorId))
-        {
-            Console.WriteLine("⚠️  Invalid ID format");
-            return;
-        }
+        var doctorId = Validator.ValidateGuid("\nEnter Doctor ID: ");
 
         var doctor = doctors.FirstOrDefault(d => d.Id == doctorId);
-        if (doctor == null)
-        {
-            Console.WriteLine("⚠️  Doctor not found");
-            return;
-        }
+        if (!Validator.IsExist(doctor, "⚠️  Doctor not found")) return;
+        if (doctor is null) return; // For the compilator
 
         var appointments = _appointmentService.ViewAppointments()
             .Where(a => a.DoctorId == doctorId)
             .OrderBy(a => a.StartTime)
             .ToList();
 
-        if (appointments.Count == 0)
-        {
-            Console.WriteLine("⚠️  No appointments found for this doctor");
-            return;
-        }
+        if (!Validator.IsExist(appointments, "⚠️  No appointments found for this doctor")) return;
 
         Console.WriteLine($"\n--- Appointments for Doctor: {doctor.Name} ---");
 
@@ -679,11 +521,7 @@ public class AppointmentMenu
             .OrderBy(a => a.StartTime)
             .ToList();
 
-        if (appointments.Count == 0)
-        {
-            Console.WriteLine("⚠️  No appointments found for this date");
-            return;
-        }
+        if (!Validator.IsExist(appointments, "⚠️  No appointments found for this date")) return;
 
         Console.WriteLine($"\n--- Appointments for Date: {date:yyyy-MM-dd} ---");
 
@@ -705,29 +543,14 @@ public class AppointmentMenu
     {
         Console.WriteLine("\n--- 📋 View Appointments by Status ---");
 
-        Console.WriteLine("\n--- Available Statuses ---");
-        foreach (var status in Enum.GetValues(typeof(AppointmentStatus)))
-            Console.WriteLine($"{(int)status}. {status}");
-
-        int statusInt = Validator.ValidatePositiveInt("\nEnter status number: ");
-        if (!Enum.IsDefined(typeof(AppointmentStatus), statusInt))
-        {
-            Console.WriteLine("⚠️  Invalid status number");
-            return;
-        }
-
-        var selectedStatus = (AppointmentStatus)statusInt;
+        var selectedStatus = Validator.ValidateAppointmentStatus();
 
         var appointments = _appointmentService.ViewAppointments()
             .Where(a => a.Status == selectedStatus)
             .OrderBy(a => a.StartTime)
             .ToList();
 
-        if (appointments.Count == 0)
-        {
-            Console.WriteLine($"⚠️  No appointments found with status '{selectedStatus}'");
-            return;
-        }
+        if (!Validator.IsExist(appointments, $"⚠️  No appointments found with status '{selectedStatus}'")) return;
 
         Console.WriteLine($"\n--- Appointments with Status: {selectedStatus} ---");
 

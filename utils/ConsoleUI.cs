@@ -1,5 +1,6 @@
 namespace SanVicenteHospital.utils;
 
+using SanVicenteHospital.models;
 using SanVicenteHospital.interfaces;
 
 // Utility class for displaying menus in the SanVicenteHospital system console.
@@ -87,4 +88,79 @@ public class ConsoleUI : IConsoleUI
         Console.WriteLine("4️⃣  View appointments by status");
         Console.WriteLine("5️⃣  Back to Appointments Main Menu 🔙");
     }
+
+    public static void ShowDoctor(Doctor doctor)
+    {
+        Console.WriteLine($"\n🆔 ID: {doctor.Id}");
+        Console.WriteLine($"👤 Name: {doctor.Name}");
+        Console.WriteLine($"🆔 Identification: {doctor.Identification}");
+        Console.WriteLine($"🎂 Age: {doctor.Age}");
+        Console.WriteLine($"🏠 Address: {doctor.Address}");
+        Console.WriteLine($"📞 Phone: {doctor.Phone}");
+        Console.WriteLine($"✉️  Email: {doctor.Email}");
+        Console.WriteLine($"🩺 Specialty: {doctor.Specialty}");
+    }
+
+    public static void ShowDoctorList(IEnumerable<Doctor> doctors)
+    {
+        foreach (var doctor in doctors)
+            ShowDoctor(doctor);
+
+        Console.WriteLine("\n-----------------------");
+    }
+
+    public static void ShowPatient(Patient patient)
+    {
+        Console.WriteLine($"\n🆔 ID: {patient.Id}");
+        Console.WriteLine($"👤 Name: {patient.Name}");
+        Console.WriteLine($"👤 Identification: {patient.Identification}");
+        Console.WriteLine($"🎂 Age: {patient.Age}");
+        Console.WriteLine($"🏠 Address: {patient.Address}");
+        Console.WriteLine($"📞 Phone: {patient.Phone}");
+        Console.WriteLine($"✉️  Email: {patient.Email}");
+    }
+
+    public static void ShowPatientList(IEnumerable<Patient> patients)
+    {
+        foreach (var patient in patients)
+            ShowPatient(patient);
+
+        Console.WriteLine("\n-----------------------");
+    }
+
+    public static void ShowAppointment(Appointment appointment)
+    {
+        Console.WriteLine($"🧍 Patient ID: {appointment.PatientId}");
+        Console.WriteLine($"👨‍⚕️ Doctor ID: {appointment.DoctorId}");
+        Console.WriteLine($"📅 Start Time: {appointment.StartTime:yyyy-MM-dd HH:mm}");
+        Console.WriteLine($"📅 End Time: {appointment.EndTime:yyyy-MM-dd HH:mm}");
+        Console.WriteLine($"💉 Service: {appointment.ServiceType}");
+        Console.WriteLine($"🗒️ Reason: {appointment.Reason}");
+    }
+
+    public static void ShowAppointmentsList(
+        List<Appointment> appointments,
+        List<Patient> patients,
+        List<Doctor> doctors)
+    {
+        Console.WriteLine("\n--- 📅  View Appointments ---");
+
+        foreach (var a in appointments.OrderBy(a => a.StartTime))
+        {
+            var patient = patients.FirstOrDefault(p => p.Id == a.PatientId);
+            var doctor = doctors.FirstOrDefault(d => d.Id == a.DoctorId);
+
+            Console.WriteLine($"\n🆔 {a.Id}");
+            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PatientId})");
+            Console.WriteLine($"👨‍⚕️ Doctor: {doctor?.Name ?? "Unknown"} ({a.DoctorId})");
+            Console.WriteLine($"📅 Start Time: {a.StartTime}");
+            Console.WriteLine($"📅 End Time: {a.EndTime}");
+            Console.WriteLine($"💉 Service: {a.ServiceType}");
+            Console.WriteLine($"🗒️  Reason: {a.Reason}");
+            Console.WriteLine($"📋 Status: {a.Status}");
+        }
+
+        Console.WriteLine("\n--- End of Appointments List ---");
+    }
+
 }

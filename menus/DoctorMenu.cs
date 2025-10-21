@@ -127,28 +127,17 @@ public class DoctorMenu
             int identification = Validator.ValidatePositiveInt("\n🆔 Identification: ");
             int age = Validator.ValidatePositiveInt("\n🎂 Age: ");
             string address = Validator.ValidateContent("\n🏠 Address: ");
-            string phone = Validator.ValidateContent("\n📞 Phone: ");
-            string email = Validator.ValidateContent("\n✉️  Email: ");
+            string phone = Validator.ValidatePhone("\n📞 Phone: ");
+            string email = Validator.ValidateEmail("\n✉️  Email: ");
+            var specialty = Validator.ValidateSpecialty();
 
-            Console.WriteLine("\n🧼 --- Specialties ---");
-            foreach (var specialty in Enum.GetValues(typeof(Specialties)))
-                Console.WriteLine($"{(int)specialty}. {specialty}");
-
-            int specialtyInt = Validator.ValidatePositiveInt("\nEnter specialty (number): ");
-            if (!Enum.IsDefined(typeof(Specialties), specialtyInt))
-            {
-                Console.WriteLine("⚠️  Invalid specialty number");
-                return;
-            }
-            var specialtyType = (Specialties)specialtyInt;
-
-            _doctorService.RegisterDoctor(name, identification, age, address, phone, email, specialtyType);
+            _doctorService.RegisterDoctor(name, identification, age, address, phone, email, specialty);
 
             Console.WriteLine("\n✅ Doctor registered successfully!");
         }
         catch (FormatException)
         {
-            Console.WriteLine("❌ Invalid input format. Please enter the data correctly.");
+            Console.WriteLine("❌ Invalid input format. Please enter the data correctly");
         }
         catch (ArgumentException ex)
         {
@@ -165,27 +154,10 @@ public class DoctorMenu
     {
         var doctors = _doctorService.ViewDoctors().ToList();
 
-        if (doctors.Count == 0)
-        {
-            Console.WriteLine("⚠️  No doctors registered");
-            return;
-        }
+        if (!Validator.IsExist(doctors, "⚠️  No doctors registered")) return;
 
         Console.WriteLine("\n--- 👥 Doctor List ---");
-
-        foreach (var doctor in doctors)
-        {
-            Console.WriteLine($"\n🆔 ID: {doctor.Id}");
-            Console.WriteLine($"👤 Name: {doctor.Name}");
-            Console.WriteLine($"👤 Identification: {doctor.Identification}");
-            Console.WriteLine($"🎂 Age: {doctor.Age}");
-            Console.WriteLine($"🏠 Address: {doctor.Address}");
-            Console.WriteLine($"📞 Phone: {doctor.Phone}");
-            Console.WriteLine($"✉️  Email: {doctor.Email}");
-            Console.WriteLine($"🩺 Specialty: {doctor.Specialty}");
-        }
-
-        Console.WriteLine($"\n-----------------------");
+        ConsoleUI.ShowDoctorList(doctors);
     }
 
 
@@ -195,40 +167,21 @@ public class DoctorMenu
 
         try
         {
-            // Mostrar doctores disponibles
             ViewDoctorsUI();
 
-            Console.Write("\nEnter Doctor ID: ");
-            var idInput = Console.ReadLine();
+            var doctorId = Validator.ValidateGuid("\nEnter Doctor ID: ");
 
-            if (!Guid.TryParse(idInput, out Guid doctorId))
-            {
-                Console.WriteLine("⚠️  Invalid ID format");
-                return;
-            }
-
-            // Buscar doctor
+            // Search doctor
             var doctor = _doctorService.GetDoctorById(doctorId);
-            if (doctor == null)
-            {
-                Console.WriteLine("❌ No doctor found with that ID");
-                return;
-            }
+            if (!Validator.IsExist(doctor, "❌ No doctor found with that ID")) return;
+            if (doctor is null) return; // For the compilator
 
-            // Mostrar datos actuales
-            Console.WriteLine($"\nCurrent data for {doctor.Name}:");
-            Console.WriteLine($"👤 Name: {doctor.Name}");
-            Console.WriteLine($"👤 Identification: {doctor.Identification}");
-            Console.WriteLine($"🎂 Age: {doctor.Age}");
-            Console.WriteLine($"🏠 Address: {doctor.Address}");
-            Console.WriteLine($"📞 Phone: {doctor.Phone}");
-            Console.WriteLine($"✉️  Email: {doctor.Email}");
-            Console.WriteLine($"🩺 Specialty: {doctor.Specialty}");
-
+            // Current dates
+            ConsoleUI.ShowDoctor(doctor);
 
             Console.WriteLine("\n---- Update fields (y/n) ----");
 
-            // Variables con valores actuales
+            // Variables with current values
             string? name = doctor.Name;
             int identification = doctor.Identification;
             int age = doctor.Age;
@@ -251,27 +204,16 @@ public class DoctorMenu
                 address = Validator.ValidateContent("🏠 Enter new address: ");
 
             if (Validator.AskYesNo("Change phone? (y/n): "))
-                phone = Validator.ValidateContent("📞 Enter new phone: ");
+                phone = Validator.ValidatePhone("📞 Enter new phone: ");
 
             if (Validator.AskYesNo("Change email? (y/n): "))
-                email = Validator.ValidateContent("✉️  Enter new email: ");
+                email = Validator.ValidateEmail("✉️  Enter new email: ");
 
             if (Validator.AskYesNo("Change specialty? (y/n): "))
             {
-                Console.WriteLine("\n🧼 --- Specialties ---");
-                foreach (var s in Enum.GetValues(typeof(Specialties)))
-                    Console.WriteLine($"{(int)s}. {s}");
-
-                int specialtyInt = Validator.ValidatePositiveInt("\nSelect specialty number: ");
-                if (Enum.IsDefined(typeof(Specialties), specialtyInt))
-                    specialty = (Specialties)specialtyInt;
-                else
-                {
-                    Console.WriteLine("⚠️  Invalid specialty number. Specialty not changed");
-                }
+                specialty = Validator.ValidateSpecialty();
             }
 
-            // Llamar al servicio para actualizar
             _doctorService.UpdateDoctor(doctorId, name, identification, age, address, phone, email, specialty);
             Console.WriteLine("\n✅ Doctor updated successfully!");
         }
@@ -298,14 +240,7 @@ public class DoctorMenu
         {
             ViewDoctorsUI();
 
-            Console.Write("\nEnter Doctor ID: ");
-            var idInput = Console.ReadLine();
-
-            if (!Guid.TryParse(idInput, out Guid doctorId))
-            {
-                Console.WriteLine("⚠️  Invalid ID format");
-                return;
-            }
+            var doctorId = Validator.ValidateGuid("\nEnter Doctor ID: ");
 
             _doctorService.RemoveDoctor(doctorId);
             Console.WriteLine("\n✅ Doctor removed successfully!");
@@ -328,40 +263,13 @@ public class DoctorMenu
     {
         Console.WriteLine("\n--- 🔍 View Doctors by Specialty ---");
 
-        Console.WriteLine("\n🧼 --- Specialties ---");
-        foreach (var specialty in Enum.GetValues(typeof(Specialties)))
-            Console.WriteLine($"{(int)specialty}. {specialty}");
+        var specialty = Validator.ValidateSpecialty();
 
-        int specialtyInt = Validator.ValidatePositiveInt("\nSelect specialty number: ");
-        if (!Enum.IsDefined(typeof(Specialties), specialtyInt))
-        {
-            Console.WriteLine("⚠️  Invalid specialty number");
-            return;
-        }
-        var specialtyType = (Specialties)specialtyInt;
+        var doctors = _doctorService.GetDoctorsBySpecialty(specialty).ToList();
 
-        var doctors = _doctorService.GetDoctorsBySpecialty(specialtyType).ToList();
+        if (!Validator.IsExist(doctors, $"⚠️  No doctors found with specialty {specialty}")) return;
 
-        if (doctors.Count == 0)
-        {
-            Console.WriteLine($"⚠️  No doctors found with specialty {specialtyType}");
-            return;
-        }
-
-        Console.WriteLine($"\n--- 👥 Doctors with specialty {specialtyType} ---");
-
-        foreach (var doctor in doctors)
-        {
-            Console.WriteLine($"\n🆔 ID: {doctor.Id}");
-            Console.WriteLine($"👤 Name: {doctor.Name}");
-            Console.WriteLine($"👤 Identification: {doctor.Identification}");
-            Console.WriteLine($"🎂 Age: {doctor.Age}");
-            Console.WriteLine($"🏠 Address: {doctor.Address}");
-            Console.WriteLine($"📞 Phone: {doctor.Phone}");
-            Console.WriteLine($"✉️  Email: {doctor.Email}");
-            Console.WriteLine($"🩺 Specialty: {doctor.Specialty}");
-        }
-
-        Console.WriteLine($"\n-----------------------");
+        Console.WriteLine($"\n--- 👥 Doctors with specialty {specialty} ---");
+        ConsoleUI.ShowDoctorList(doctors);
     }
 }

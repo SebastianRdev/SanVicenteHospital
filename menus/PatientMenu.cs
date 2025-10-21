@@ -121,8 +121,8 @@ public class PatientMenu
             int identification = Validator.ValidatePositiveInt("\n🆔 Identification: ");
             int age = Validator.ValidatePositiveInt("\n🎂 Age: ");
             string address = Validator.ValidateContent("\n🏠 Address: ");
-            string phone = Validator.ValidateContent("\n📞 Phone: ");
-            string email = Validator.ValidateContent("\n✉️  Email: ");
+            string phone = Validator.ValidatePhone("\n📞 Phone: ");
+            string email = Validator.ValidateEmail("\n✉️  Email: ");
 
             _patientService.RegisterPatient(name, identification, age, address, phone, email);
 
@@ -147,26 +147,10 @@ public class PatientMenu
     {
         var patients = _patientService.ViewPatients().ToList();
 
-        if (patients.Count == 0)
-        {
-            Console.WriteLine("⚠️  No patients registered");
-            return;
-        }
+        if (!Validator.IsExist(patients, $"⚠️  No patients registered")) return;
 
         Console.WriteLine("\n--- 👥 Patient List ---");
-
-        foreach (var patient in patients)
-        {
-            Console.WriteLine($"\n🆔 ID: {patient.Id}");
-            Console.WriteLine($"👤 Name: {patient.Name}");
-            Console.WriteLine($"👤 Identification: {patient.Identification}");
-            Console.WriteLine($"🎂 Age: {patient.Age}");
-            Console.WriteLine($"🏠 Address: {patient.Address}");
-            Console.WriteLine($"📞 Phone: {patient.Phone}");
-            Console.WriteLine($"✉️  Email: {patient.Email}");
-        }
-
-        Console.WriteLine($"\n-----------------------");
+        ConsoleUI.ShowPatientList(patients);
     }
 
 
@@ -179,36 +163,19 @@ public class PatientMenu
             // Show available patients
             ViewPatientsUI();
 
-            Console.Write("\nEnter Patient ID: ");
-            var idInput = Console.ReadLine();
-
-            if (!Guid.TryParse(idInput, out Guid patientId))
-            {
-                Console.WriteLine("⚠️  Invalid ID format");
-                return;
-            }
+            var patientId = Validator.ValidateGuid("\nEnter Patient ID: ");
 
             // Find patient
             var patient = _patientService.GetPatientById(patientId);
-            if (patient == null)
-            {
-                Console.WriteLine("❌ No patient found with that ID");
-                return;
-            }
+            if (!Validator.IsExist(patient, "❌ No patient found with that ID")) return;
+            if (patient is null) return; // For the compilator
 
             // Show current data
-            Console.WriteLine($"\nCurrent data for {patient.Name}:");
-            Console.WriteLine($"👤 Name: {patient.Name}");
-            Console.WriteLine($"👤 Identification: {patient.Identification}");
-            Console.WriteLine($"🎂 Age: {patient.Age}");
-            Console.WriteLine($"🏠 Address: {patient.Address}");
-            Console.WriteLine($"📞 Phone: {patient.Phone}");
-            Console.WriteLine($"✉️  Email: {patient.Email}");
-
+            ConsoleUI.ShowPatient(patient);
 
             Console.WriteLine("\n---- Update fields (y/n) ----");
 
-            // Variables con valores actuales
+            // Variables with current values
             string? name = patient.Name;
             int identification = patient.Identification;
             int age = patient.Age;
@@ -230,12 +197,11 @@ public class PatientMenu
                 address = Validator.ValidateContent("🏠 Enter new address: ");
 
             if (Validator.AskYesNo("Change phone? (y/n): "))
-                phone = Validator.ValidateContent("📞 Enter new phone: ");
+                phone = Validator.ValidatePhone("📞 Enter new phone: ");
 
             if (Validator.AskYesNo("Change email? (y/n): "))
-                email = Validator.ValidateContent("✉️  Enter new email: ");
+                email = Validator.ValidateEmail("✉️  Enter new email: ");
 
-            // Llamar al servicio para actualizar
             _patientService.UpdatePatient(patientId, name, identification, age, address, phone, email);
             Console.WriteLine("\n✅ Patient updated successfully!");
         }
@@ -245,14 +211,13 @@ public class PatientMenu
         }
         catch (KeyNotFoundException)
         {
-            Console.WriteLine("❌ No patient found with that ID.");
+            Console.WriteLine("❌ No patient found with that ID");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"❌ Error updating patient: {ex.Message}");
         }
     }
-
 
 
     private void RemovePatientUI()
@@ -262,14 +227,7 @@ public class PatientMenu
         {
             ViewPatientsUI();
 
-            Console.Write("\nEnter Patient ID: ");
-            var idInput = Console.ReadLine();
-
-            if (!Guid.TryParse(idInput, out Guid patientId))
-            {
-                Console.WriteLine("⚠️  Invalid ID format");
-                return;
-            }
+            var patientId = Validator.ValidateGuid("\nEnter Patient ID: ");
 
             _patientService.RemovePatient(patientId);
             Console.WriteLine("\n✅ Patient removed successfully!");

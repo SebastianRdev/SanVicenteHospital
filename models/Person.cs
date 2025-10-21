@@ -1,6 +1,6 @@
 namespace SanVicenteHospital.models;
 
-public class Person
+public abstract class Person
 {
     public Guid Id { get; private set; } = Guid.NewGuid();
     public string? Name { get; set; }

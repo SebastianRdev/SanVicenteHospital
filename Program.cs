@@ -3,11 +3,14 @@ using SanVicenteHospital.models;
 using SanVicenteHospital.repositories;
 using SanVicenteHospital.services;
 using SanVicenteHospital.seeders;
+using DotNetEnv;
 
 public class Program
 {
     static void Main()
     {
+        Env.Load("C:\\Users\\Lenovo\\Documents\\Riwi\\SanVicenteHospital\\.env");
+
         var patientRepo = new RepositoryDict<Patient>();
         var doctorRepo = new RepositoryDict<Doctor>();
         var appointmentRepo = new Repository<Appointment>();

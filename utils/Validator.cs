@@ -1,7 +1,9 @@
 namespace SanVicenteHospital.utils;
 
-// Utility class for common validations in the SanVicenteHospital system.
+using System.Text.RegularExpressions;
+using SanVicenteHospital.models.Enums;
 
+// Utility class for common validations in the SanVicenteHospital system.
 public static class Validator
 {
     // Requests and validates that the entered content is not empty.
@@ -34,6 +36,30 @@ public static class Validator
             {
                 Console.WriteLine("❌ Invalid input. Please enter a number");
             }
+        }
+    }
+
+    public static string ValidateEmail(string prompt)
+    {
+        string email;
+        while (true)
+        {
+            Console.Write(prompt);
+            email = Console.ReadLine()!;
+            if (IsValidEmail(email))
+                return email;
+        }
+    }
+
+    public static string ValidatePhone(string prompt)
+    {
+        string phone;
+        while (true)
+        {
+            Console.Write(prompt);
+            phone = Console.ReadLine()!;
+            if (IsValidPhone(phone))
+                return phone;
         }
     }
 
@@ -126,6 +152,88 @@ public static class Validator
         }
 
         return false;
+    }
+
+
+    public static bool IsValidEmail(string email)
+    {
+        if (IsEmpty(email))
+            return false;
+
+        string pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+        if (!Regex.IsMatch(email, pattern))
+        {
+            Console.WriteLine("⚠️  Invalid email format. Example: user@mail.com");
+            return false;
+        }
+
+        return true;
+    }
+
+    public static bool IsValidPhone(string phone)
+    {
+        // Allow numbers with or without + at start, between 7 and 15 digits
+        string pattern = @"^\+?\d{7,15}$";
+
+        if (!Regex.IsMatch(phone, pattern))
+        {
+            Console.WriteLine("⚠️  Invalid phone number. Use only digits (optionally with + at the start, e.g., +573001234567)");
+            return false;
+        }
+
+        return true;
+    }
+
+    public static Guid ValidateGuid(string message)
+    {
+        Console.Write(message);
+        string? input = Console.ReadLine();
+
+        if (!Guid.TryParse(input, out Guid id))
+            throw new FormatException("⚠️ Invalid ID format.");
+
+        return id;
+    }
+    public static Specialties ValidateSpecialty()
+    {
+        Console.WriteLine("\n🧼 --- Specialties ---");
+        foreach (var s in Enum.GetValues(typeof(Specialties)))
+            Console.WriteLine($"{(int)s}. {s}");
+
+        int specialtyInt = ValidatePositiveInt("\nEnter specialty (number): ");
+
+        if (!Enum.IsDefined(typeof(Specialties), specialtyInt))
+            throw new ArgumentException("⚠️  Invalid specialty number");
+
+        return (Specialties)specialtyInt;
+    }
+
+    public static ServiceType ValidateServiceType()
+    {
+        Console.WriteLine("\n--- Available Services ---");
+        foreach (var s in Enum.GetValues(typeof(ServiceType)))
+            Console.WriteLine($"{(int)s}. {s}");
+
+        int serviceInt = ValidatePositiveInt("\nEnter service (number): ");
+
+        if (!Enum.IsDefined(typeof(ServiceType), serviceInt))
+            throw new ArgumentException("⚠️  Invalid service number");
+
+        return (ServiceType)serviceInt;
+    }
+    
+    public static AppointmentStatus ValidateAppointmentStatus()
+    {
+        Console.WriteLine("\n--- Available Statuses ---");
+        foreach (var status in Enum.GetValues(typeof(AppointmentStatus)))
+            Console.WriteLine($"{(int)status}. {status}");
+
+        int statusInt = ValidatePositiveInt("\nEnter service (number): ");
+
+        if (!Enum.IsDefined(typeof(AppointmentStatus), statusInt))
+            throw new ArgumentException("⚠️  Invalid status number");
+
+        return (AppointmentStatus)statusInt;
     }
 
 }

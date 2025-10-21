@@ -1,4 +1,3 @@
-
 namespace SanVicenteHospital.services;
 
 using System.Net;
@@ -7,6 +6,7 @@ using SanVicenteHospital.models;
 using SanVicenteHospital.repositories;
 using SanVicenteHospital.interfaces;
 using DotNetEnv;
+
 public class EmailService
 {
     private readonly IRepository<EmailLog> _emailRepo;
@@ -15,7 +15,6 @@ public class EmailService
     public EmailService(IRepository<EmailLog> emailRepo)
     {
         _emailRepo = emailRepo;
-        Env.Load();
 
         _emailUser = Environment.GetEnvironmentVariable("EMAIL_USER") ?? throw new Exception("EMAIL_USER not found");
         _emailPass = Environment.GetEnvironmentVariable("EMAIL_PASS") ?? throw new Exception("EMAIL_PASS not found");
