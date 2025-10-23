@@ -11,8 +11,6 @@ public class DoctorMenu
 {
     private readonly DoctorService _doctorService;
 
-    bool showPressKey = false;
-
     public DoctorMenu(DoctorService doctorService)
     {
         _doctorService = doctorService;
@@ -24,11 +22,6 @@ public class DoctorMenu
         {
             try
             {
-                if (showPressKey)
-                {
-                    Console.WriteLine("\nPress any key to display the menu...");
-                    Console.ReadKey();
-                }
                 Console.Clear();
                 ConsoleUI.ShowDoctorMainMenu();
                 Console.Write("\n👉 Enter your choice: ");
@@ -37,15 +30,14 @@ public class DoctorMenu
                 {
                     case 1:
                         DoctorCRUD();
-                        showPressKey = true;
+                        WaitForKey();
                         continue;
                     case 2:
                         ViewDoctorsBySpecialtyUI();
-                        showPressKey = true;
+                        WaitForKey();
                         continue;
                     case 3:
                         Console.WriteLine("\nBack to main menu 👥");
-                        showPressKey = false;
                         break;
                     default:
                         Console.WriteLine("\n⚠️ Invalid choice. Please try again");
@@ -55,6 +47,7 @@ public class DoctorMenu
             catch
             {
                 Console.WriteLine("\n❌ Invalid input. Please enter a number");
+                WaitForKey();
                 continue;
             }
             break;
@@ -67,11 +60,6 @@ public class DoctorMenu
         {
             try
             {
-                if (showPressKey)
-                {
-                    Console.WriteLine("\nPress any key to display the menu...");
-                    Console.ReadKey();
-                }
                 Console.Clear();
                 ConsoleUI.ShowDoctorCRUD();
                 Console.Write("\n👉 Enter your choice: ");
@@ -86,23 +74,22 @@ public class DoctorMenu
                 {
                     case 1:
                         RegisterDoctorUI();
-                        showPressKey = true;
+                        WaitForKey();
                         continue;
                     case 2:
                         ViewDoctorsUI();
-                        showPressKey = true;
+                        WaitForKey();
                         continue;
                     case 3:
                         UpdateDoctorUI();
-                        showPressKey = true;
+                        WaitForKey();
                         continue;
                     case 4:
                         RemoveDoctorUI();
-                        showPressKey = true;
+                        WaitForKey();
                         continue;
                     case 5:
                         Console.WriteLine("\nBack to Doctor main menu 👥");
-                        showPressKey = false;
                         break;
                     default:
                         Console.WriteLine("\n⚠️ Invalid choice. Please try again");
@@ -112,10 +99,17 @@ public class DoctorMenu
             catch (Exception ex)
             {
                 Console.WriteLine($"\n❌ {ex.Message}");
+                WaitForKey();
                 continue;
             }
             break;
         }
+    }
+
+    private void WaitForKey()
+    {
+        Console.WriteLine("\nPress any key to continue...");
+        Console.ReadKey();
     }
 
     private void RegisterDoctorUI()

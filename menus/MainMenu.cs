@@ -23,7 +23,7 @@ public class MainMenu
     // Create menus by passing dependencies
     private static readonly PatientMenu _patientMenu = new(_patientService);
     private static readonly DoctorMenu _doctorMenu = new(_doctorService);
-    private static readonly AppointmentMenu _appointmentMenu = new(_appointmentService, _emailService);
+    private static readonly AppointmentMenu _appointmentMenu = new(_appointmentService);
 
     public static void Menu()
     {

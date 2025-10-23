@@ -2,18 +2,16 @@ namespace SanVicenteHospital.menus;
 
 using SanVicenteHospital.utils;
 using SanVicenteHospital.services;
+using SanVicenteHospital.interfaces;
 using SanVicenteHospital.models.Enums;
 
 public class AppointmentMenu
 {
     private readonly AppointmentService _appointmentService;
-    private readonly EmailService _emailService;
-    bool showPressKey = false;
 
-    public AppointmentMenu(AppointmentService appointmentService, EmailService emailService)
+    public AppointmentMenu(AppointmentService appointmentService)
     {
         _appointmentService = appointmentService;
-        _emailService = emailService;
     }
 
     public void AppointmentMainMenu()
@@ -22,11 +20,6 @@ public class AppointmentMenu
         {
             try
             {
-                if (showPressKey)
-                {
-                    Console.WriteLine("\nPress any key to display the menu...");
-                    Console.ReadKey();
-                }
                 Console.Clear();
                 ConsoleUI.ShowAppointmentsMainMenu();
                 Console.Write("\n👉 Enter your choice: ");
@@ -35,23 +28,20 @@ public class AppointmentMenu
                 {
                     case 1:
                         AppointmentsCRUD();
-                        showPressKey = true;
                         continue;
                     case 2:
                         ChangeAppointmentStatusUI();
-                        showPressKey = true;
+                        WaitForKey();
                         continue;
                     case 3:
                         ViewAppointmentsFilteredByMenuUI();
-                        showPressKey = true;
                         continue;
                     case 4:
-                        _emailService.ViewEmailHistory();
-                        showPressKey = true;
+                        _appointmentService.ViewEmailHistory();
+                        WaitForKey();
                         continue;
                     case 5:
                         Console.WriteLine("\nBack to main menu");
-                        showPressKey = false;
                         break;
                     default:
                         Console.WriteLine("\n⚠️  Invalid choice. Please try again");
@@ -61,6 +51,7 @@ public class AppointmentMenu
             catch
             {
                 Console.WriteLine("\n❌ Invalid input. Please enter a number");
+                WaitForKey();
                 continue;
             }
             break;
@@ -73,11 +64,6 @@ public class AppointmentMenu
         {
             try
             {
-                if (showPressKey)
-                {
-                    Console.WriteLine("\nPress any key to display the menu...");
-                    Console.ReadKey();
-                }
                 Console.Clear();
                 ConsoleUI.ShowAppointmentsCRUD();
                 Console.Write("\n👉 Enter your choice: ");
@@ -91,23 +77,22 @@ public class AppointmentMenu
                 {
                     case 1:
                         RegisterAppointmentUI();
-                        showPressKey = true;
+                        WaitForKey();
                         continue;
                     case 2:
                         ViewAppointmentsUI();
-                        showPressKey = true;
+                        WaitForKey();
                         continue;
                     case 3:
                         UpdateAppointmentUI();
-                        showPressKey = true;
+                        WaitForKey();
                         continue;
                     case 4:
                         RemoveAppointmentUI();
-                        showPressKey = true;
+                        WaitForKey();
                         continue;
                     case 5:
                         Console.WriteLine("\nBack to main menu");
-                        showPressKey = false;
                         break;
                     default:
                         Console.WriteLine("\n⚠️  Invalid choice. Please try again");
@@ -117,10 +102,17 @@ public class AppointmentMenu
             catch (Exception ex)
             {
                 Console.WriteLine($"\n❌ {ex.Message}");
+                WaitForKey();
                 continue;
             }
             break;
         }
+    }
+
+    private void WaitForKey()
+    {
+        Console.WriteLine("\nPress any key to continue...");
+        Console.ReadKey();
     }
 
     private void RegisterAppointmentUI()
@@ -239,7 +231,6 @@ public class AppointmentMenu
             // Get current appointment
             var appointment = _appointmentService.GetAppointmentById(appointmentId);
             if (!Validator.IsExist(appointment, "❌ No appointment found with that ID")) return;
-            if (appointment is null) return; // For the compilator
 
             Console.WriteLine($"\nCurrent appointment details:");
             ConsoleUI.ShowAppointment(appointment);
@@ -262,7 +253,7 @@ public class AppointmentMenu
                 foreach (var p in patients)
                     Console.WriteLine($"ID: {p.Id} | Name: {p.Name}");
 
-                var patientId = Validator.ValidateGuid("\nEnter Patient ID: ");
+                newPatientId = Validator.ValidateGuid("\nEnter Patient ID: ");
             }
             
             if (Validator.AskYesNo("Change doctor? (y/n): "))
@@ -274,7 +265,7 @@ public class AppointmentMenu
                 foreach (var d in doctors)
                     Console.WriteLine($"ID: {d.Id} | Name: {d.Name} | Specialty: {d.Specialty}");
 
-                var doctorId = Validator.ValidateGuid("\nEnter Doctor ID: ");
+                newDoctorId = Validator.ValidateGuid("\nEnter Doctor ID: ");
             }
             
             if (Validator.AskYesNo("Change start time? (y/n): "))
@@ -297,7 +288,6 @@ public class AppointmentMenu
             {
                 newService = Validator.ValidateServiceType();
             }
-
             
             if (Validator.AskYesNo("Change reason? (y/n): "))
                 newReason = Validator.ValidateContent("📝 Enter new reason: ");
@@ -371,7 +361,6 @@ public class AppointmentMenu
         var appointment = _appointmentService.GetAppointmentById(appointmentId);
 
         if (!Validator.IsExist(appointment, "❌ Appointment not found")) return;
-        if (appointment is null) return; // For the compilator
 
         Console.WriteLine($"\nCurrent status: {appointment.Status}");
         var newStatus = Validator.ValidateAppointmentStatus();
@@ -396,6 +385,7 @@ public class AppointmentMenu
         {
             try
             {
+                Console.Clear();
                 ConsoleUI.ShowAppointmentsByMenu();
                 Console.Write("\n👉 Enter your choice: ");
                 int choice = Convert.ToInt32(Console.ReadLine());
@@ -403,15 +393,19 @@ public class AppointmentMenu
                 {
                     case 1:
                         ViewAppointmentsByPatientUI();
+                        WaitForKey();
                         continue;
                     case 2:
                         ViewAppointmentsByDoctorUI();
+                        WaitForKey();
                         continue;
                     case 3:
                         ViewAppointmentsByDateUI();
+                        WaitForKey();
                         continue;
                     case 4:
                         ViewAppointmentsByStatusUI();
+                        WaitForKey();
                         continue;
                     case 5:
                         Console.WriteLine("\nBack to main menu");
@@ -424,6 +418,7 @@ public class AppointmentMenu
             catch
             {
                 Console.WriteLine("\n❌ Invalid input. Please enter a number");
+                WaitForKey();
                 continue;
             }
             break;
@@ -441,31 +436,15 @@ public class AppointmentMenu
         foreach (var p in patients)
             Console.WriteLine($"ID: {p.Id} | Name: {p.Name}");
 
-
         var patientId = Validator.ValidateGuid("\nEnter Patient ID: ");
 
-        var patient = patients.FirstOrDefault(p => p.Id == patientId);
-        if (!Validator.IsExist(patient, "⚠️  Patient not found")) return;
-        if (patient is null) return; // For the compilator
-
-        var appointments = _appointmentService.ViewAppointments()
-            .Where(a => a.PatientId == patientId)
-            .OrderBy(a => a.StartTime)
-            .ToList();
-
+        var appointments = _appointmentService.GetAppointmentsByPatient(patientId);
         if (!Validator.IsExist(appointments, "⚠️  No appointments found for this patient")) return;
 
-        Console.WriteLine($"\n--- Appointments for Patient: {patient.Name} ---");
+        var patient = patients.FirstOrDefault(p => p.Id == patientId);
 
-        foreach (var a in appointments)
-        {
-            var doctor = _appointmentService.GetAllDoctors().FirstOrDefault(d => d.Id == a.DoctorId);
-            Console.WriteLine($"\n🗓️  {a.StartTime} : {a.EndTime}");
-            Console.WriteLine($"💉 Service: {a.ServiceType}");
-            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.DoctorId})");
-            Console.WriteLine($"📋 Status: {a.Status}");
-        }
-
+        Console.WriteLine($"\n--- Appointments for Patient: {patient!.Name} ---");
+        ConsoleUI.ShowAppointmentsByPatient(appointments, _appointmentService);
     }
 
     private void ViewAppointmentsByDoctorUI()
@@ -481,28 +460,13 @@ public class AppointmentMenu
 
         var doctorId = Validator.ValidateGuid("\nEnter Doctor ID: ");
 
-        var doctor = doctors.FirstOrDefault(d => d.Id == doctorId);
-        if (!Validator.IsExist(doctor, "⚠️  Doctor not found")) return;
-        if (doctor is null) return; // For the compilator
-
-        var appointments = _appointmentService.ViewAppointments()
-            .Where(a => a.DoctorId == doctorId)
-            .OrderBy(a => a.StartTime)
-            .ToList();
-
+        var appointments = _appointmentService.GetAppointmentsByDoctor(doctorId);
         if (!Validator.IsExist(appointments, "⚠️  No appointments found for this doctor")) return;
 
-        Console.WriteLine($"\n--- Appointments for Doctor: {doctor.Name} ---");
+        var doctor = doctors.FirstOrDefault(d => d.Id == doctorId);
 
-        foreach (var a in appointments)
-        {
-            var patient = _appointmentService.GetAllPatients().FirstOrDefault(p => p.Id == a.PatientId);
-            Console.WriteLine($"\n🗓️  {a.StartTime} : {a.EndTime}");
-            Console.WriteLine($"💉 Service: {a.ServiceType}");
-            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PatientId})");
-            Console.WriteLine($"📋 Status: {a.Status}");
-        }
-
+        Console.WriteLine($"\n--- Appointments for Doctor: {doctor!.Name} ---");
+        ConsoleUI.ShowAppointmentsByDoctor(appointments, _appointmentService);
     }
 
     private void ViewAppointmentsByDateUI()
@@ -516,27 +480,11 @@ public class AppointmentMenu
             return;
         }
 
-        var appointments = _appointmentService.ViewAppointments()
-            .Where(a => a.StartTime.Date == date.Date)
-            .OrderBy(a => a.StartTime)
-            .ToList();
-
+        var appointments = _appointmentService.GetAppointmentsByDate(date);
         if (!Validator.IsExist(appointments, "⚠️  No appointments found for this date")) return;
 
         Console.WriteLine($"\n--- Appointments for Date: {date:yyyy-MM-dd} ---");
-
-        foreach (var a in appointments)
-        {
-            var patient = _appointmentService.GetAllPatients().FirstOrDefault(p => p.Id == a.PatientId);
-            var doctor = _appointmentService.GetAllDoctors().FirstOrDefault(d => d.Id == a.DoctorId);
-
-            Console.WriteLine($"\n🕓 {a.StartTime:HH:mm} - {a.EndTime:HH:mm}");
-            Console.WriteLine($"💉 {a.ServiceType}");
-            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PatientId})");
-            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.DoctorId})");
-            Console.WriteLine($"📋 Status: {a.Status}");
-        }
-
+        ConsoleUI.ShowAppointmentsByDate(appointments, _appointmentService);
     }
 
     private void ViewAppointmentsByStatusUI()
@@ -545,25 +493,11 @@ public class AppointmentMenu
 
         var selectedStatus = Validator.ValidateAppointmentStatus();
 
-        var appointments = _appointmentService.ViewAppointments()
-            .Where(a => a.Status == selectedStatus)
-            .OrderBy(a => a.StartTime)
-            .ToList();
-
+        var appointments = _appointmentService.GetAppointmentsByStatus(selectedStatus);
         if (!Validator.IsExist(appointments, $"⚠️  No appointments found with status '{selectedStatus}'")) return;
 
         Console.WriteLine($"\n--- Appointments with Status: {selectedStatus} ---");
-
-        foreach (var a in appointments)
-        {
-            var patient = _appointmentService.GetAllPatients().FirstOrDefault(p => p.Id == a.PatientId);
-            var doctor = _appointmentService.GetAllDoctors().FirstOrDefault(d => d.Id == a.DoctorId);
-
-            Console.WriteLine($"\n🗓️  {a.StartTime} - {a.EndTime}");
-            Console.WriteLine($"💉 {a.ServiceType}");
-            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PatientId})");
-            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.DoctorId})");
-        }
+        ConsoleUI.ShowAppointmentsByStatus(appointments, _appointmentService);
     }
 
 }

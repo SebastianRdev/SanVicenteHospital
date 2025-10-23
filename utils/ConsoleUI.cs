@@ -2,6 +2,7 @@ namespace SanVicenteHospital.utils;
 
 using SanVicenteHospital.models;
 using SanVicenteHospital.interfaces;
+using SanVicenteHospital.services;
 
 // Utility class for displaying menus in the SanVicenteHospital system console.
 // Implements the IConsoleUI interface.
@@ -163,4 +164,56 @@ public class ConsoleUI : IConsoleUI
         Console.WriteLine("\n--- End of Appointments List ---");
     }
 
+    public static void ShowAppointmentsByPatient(List<Appointment> appointments, AppointmentService service)
+    {
+        foreach (var a in appointments)
+        {
+            var doctor = service.GetAllDoctors().FirstOrDefault(d => d.Id == a.DoctorId);
+            Console.WriteLine($"\n🗓️  {a.StartTime} : {a.EndTime}");
+            Console.WriteLine($"💉 Service: {a.ServiceType}");
+            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.DoctorId})");
+            Console.WriteLine($"📋 Status: {a.Status}");
+        }
+    }
+
+    public static void ShowAppointmentsByDoctor(List<Appointment> appointments, AppointmentService service)
+    {
+        foreach (var a in appointments)
+        {
+            var patient = service.GetAllPatients().FirstOrDefault(p => p.Id == a.PatientId);
+            Console.WriteLine($"\n🗓️  {a.StartTime} : {a.EndTime}");
+            Console.WriteLine($"💉 Service: {a.ServiceType}");
+            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PatientId})");
+            Console.WriteLine($"📋 Status: {a.Status}");
+        }
+    }
+
+    public static void ShowAppointmentsByDate(List<Appointment> appointments, AppointmentService service)
+    {
+        foreach (var a in appointments)
+        {
+            var patient = service.GetAllPatients().FirstOrDefault(p => p.Id == a.PatientId);
+            var doctor = service.GetAllDoctors().FirstOrDefault(d => d.Id == a.DoctorId);
+
+            Console.WriteLine($"\n🕓 {a.StartTime:HH:mm} - {a.EndTime:HH:mm}");
+            Console.WriteLine($"💉 {a.ServiceType}");
+            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PatientId})");
+            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.DoctorId})");
+            Console.WriteLine($"📋 Status: {a.Status}");
+        }
+    }
+
+    public static void ShowAppointmentsByStatus(List<Appointment> appointments, AppointmentService service)
+    {
+        foreach (var a in appointments)
+        {
+            var patient = service.GetAllPatients().FirstOrDefault(p => p.Id == a.PatientId);
+            var doctor = service.GetAllDoctors().FirstOrDefault(d => d.Id == a.DoctorId);
+
+            Console.WriteLine($"\n🗓️  {a.StartTime} - {a.EndTime}");
+            Console.WriteLine($"💉 {a.ServiceType}");
+            Console.WriteLine($"🧍 Patient: {patient?.Name ?? "Unknown"} ({a.PatientId})");
+            Console.WriteLine($"🩺 Doctor: {doctor?.Name ?? "Unknown"} ({a.DoctorId})");
+        }
+    }
 }

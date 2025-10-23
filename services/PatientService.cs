@@ -25,8 +25,8 @@ public class PatientService
     {
         if (Validator.IsDuplicate(_patientRepo.GetAll(), d => d.Identification, identification, "identification"))
             throw new ArgumentException(" Patient already registered with that identification");
-        if (_doctorRepo.GetAll().Any(p => p.Identification == identification))
-            throw new ArgumentException(" \nThis identification is already used by a doctor");
+        if (Validator.IsDuplicate(_doctorRepo.GetAll(), d => d.Identification, identification, "identification"))
+            throw new ArgumentException(" Doctor already registered with that identification");
 
         var patient = new Patient(name, identification, age, address, phone, email);
 
@@ -57,8 +57,8 @@ public class PatientService
                 throw new ArgumentException("Another patient already has that identification");
 
             // Check for duplicates among doctors
-            if (_doctorRepo.GetAll().Any(d => d.Identification == identification.Value))
-                throw new ArgumentException(" \nThis identification is already used by a doctor");
+            if (Validator.IsDuplicate(_doctorRepo.GetAll(), d => d.Identification, identification, "identification"))
+                throw new ArgumentException(" Doctor already registered with that identification");
 
             patient.Identification = identification.Value;
         }

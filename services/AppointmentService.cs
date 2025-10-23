@@ -158,9 +158,13 @@ public class AppointmentService
     }
 
     // Returns a single appointment by ID.
-    public Appointment? GetAppointmentById(Guid id)
+    public Appointment GetAppointmentById(Guid id)
     {
-        return _appointmentRepo.GetById(id);
+        var appointment = _appointmentRepo.GetById(id);
+        if (appointment == null)
+            throw new KeyNotFoundException($"Appointment with ID {id} not found");
+        
+        return appointment;
     }
 
     public void ChangeAppointmentStatus(Guid appointmentId, AppointmentStatus newStatus, string? notes = null)
@@ -178,6 +182,52 @@ public class AppointmentService
             appointment.Notes = notes;
 
         _appointmentRepo.Update(appointment);
+    }
+
+    public void ViewEmailHistory()
+    {
+        _emailService.ViewEmailHistory();
+    }
+
+    public List<Appointment> GetAppointmentsByPatient(Guid patientId)
+    {
+        var patient = _patientRepo.GetById(patientId);
+        if (patient == null)
+            throw new KeyNotFoundException($"⚠️  Patient with ID {patientId} not found");
+
+        return _appointmentRepo.GetAll()
+            .Where(a => a.PatientId == patientId)
+            .OrderBy(a => a.StartTime)
+            .ToList();
+    }
+
+    public List<Appointment> GetAppointmentsByDoctor(Guid doctorId)
+    {
+        var doctor = _doctorRepo.GetById(doctorId);
+        if (doctor == null)
+            throw new KeyNotFoundException($"⚠️  Doctor with ID {doctorId} not found");
+        
+        return _appointmentRepo.GetAll()
+            .Where(a => a.DoctorId == doctorId)
+            .OrderBy(a => a.StartTime)
+            .ToList();
+    }
+
+    public List<Appointment> GetAppointmentsByDate(DateTime date)
+    {
+
+        return _appointmentRepo.GetAll()
+            .Where(a => a.StartTime.Date == date.Date)
+            .OrderBy(a => a.StartTime)
+            .ToList();
+    }
+
+    public List<Appointment> GetAppointmentsByStatus(AppointmentStatus status)
+    {
+        return _appointmentRepo.GetAll()
+            .Where(a => a.Status == status)
+            .OrderBy(a => a.StartTime)
+            .ToList();
     }
 
 }

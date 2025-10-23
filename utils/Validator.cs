@@ -221,7 +221,7 @@ public static class Validator
 
         return (ServiceType)serviceInt;
     }
-    
+
     public static AppointmentStatus ValidateAppointmentStatus()
     {
         Console.WriteLine("\n--- Available Statuses ---");
@@ -236,4 +236,5 @@ public static class Validator
         return (AppointmentStatus)statusInt;
     }
 
+    
 }
